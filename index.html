@@ -1,244 +1,209 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-  <title>Simple Mobile AR Lab - Motor Status</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>AR Animals & Spaceship</title>
 
-  <!-- Open-source libraries. The versions are pinned so A-Frame and AR.js match. -->
-  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.7/aframe/build/aframe-ar.js"></script>
+<script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/ar.js@3.4.5/aframe/build/aframe-ar.js"></script>
 
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      overflow: hidden;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: #111;
-    }
-
-    #top-panel {
-      position: fixed;
-      top: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 20;
-      width: min(92vw, 520px);
-      padding: 10px 14px;
-      border-radius: 12px;
-      background: rgba(0, 0, 0, 0.68);
-      color: white;
-      text-align: center;
-      font-size: 15px;
-      line-height: 1.4;
-      backdrop-filter: blur(4px);
-    }
-
-    #controls {
-      position: fixed;
-      left: 0;
-      right: 0;
-      bottom: 18px;
-      z-index: 20;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      padding: 0 12px;
-    }
-
-    button {
-      min-width: 132px;
-      min-height: 48px;
-      border: 0;
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-size: 16px;
-      font-weight: 700;
-      cursor: pointer;
-      touch-action: manipulation;
-    }
-
-    #run-button { background: #ffffff; color: #111111; }
-    #status-button { background: #ffd54f; color: #111111; }
-
-    .hint {
-      display: block;
-      margin-top: 4px;
-      font-size: 12px;
-      opacity: 0.8;
-    }
-  </style>
-
-  <script>
-    // A tiny reusable component that rotates an object without extra libraries.
-    AFRAME.registerComponent('spin-control', {
-      schema: {
-        axis: { type: 'string', default: 'y' },
-        speed: { type: 'number', default: 180 },
-        active: { type: 'boolean', default: true }
-      },
-
-      tick: function (_time, deltaMs) {
-        if (!this.data.active || !deltaMs) return;
-
-        const radians = THREE.MathUtils.degToRad(this.data.speed * deltaMs / 1000);
-        const axis = this.data.axis;
-
-        if (axis === 'x') this.el.object3D.rotation.x += radians;
-        if (axis === 'y') this.el.object3D.rotation.y += radians;
-        if (axis === 'z') this.el.object3D.rotation.z += radians;
-      }
-    });
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const marker = document.querySelector('#hiro-marker');
-      const shaft = document.querySelector('#shaft');
-      const motorBody = document.querySelector('#motor-body');
-      const warningLamp = document.querySelector('#warning-lamp');
-      const arLabel = document.querySelector('#ar-label');
-      const topPanel = document.querySelector('#top-panel');
-      const runButton = document.querySelector('#run-button');
-      const statusButton = document.querySelector('#status-button');
-
-      let running = true;
-      let warning = false;
-
-      marker.addEventListener('markerFound', () => {
-        topPanel.innerHTML = 'พบ Hiro Marker แล้ว — โมเดลมอเตอร์พร้อมใช้งาน<span class="hint">แตะปุ่มด้านล่างเพื่อทดลองควบคุม</span>';
-      });
-
-      marker.addEventListener('markerLost', () => {
-        topPanel.innerHTML = 'เล็งกล้องไปที่ Hiro Marker<span class="hint">วาง Marker บนโต๊ะที่มีแสงเพียงพอและให้เห็นกรอบดำครบทั้งสี่ด้าน</span>';
-      });
-
-      runButton.addEventListener('click', () => {
-        running = !running;
-        shaft.setAttribute('spin-control', 'active', running);
-        runButton.textContent = running ? 'หยุดมอเตอร์' : 'เริ่มมอเตอร์';
-      });
-
-      statusButton.addEventListener('click', () => {
-        warning = !warning;
-
-        if (warning) {
-          motorBody.setAttribute('color', '#ef5350');
-          warningLamp.setAttribute('color', '#ff1744');
-          warningLamp.setAttribute('material', 'emissive', '#ff1744');
-          arLabel.setAttribute('value', 'MOTOR M1\nSTATUS: WARNING');
-          statusButton.textContent = 'เปลี่ยนเป็นปกติ';
-        } else {
-          motorBody.setAttribute('color', '#1976d2');
-          warningLamp.setAttribute('color', '#00e676');
-          warningLamp.setAttribute('material', 'emissive', '#00c853');
-          arLabel.setAttribute('value', 'MOTOR M1\nSTATUS: NORMAL');
-          statusButton.textContent = 'จำลองคำเตือน';
-        }
-      });
-    });
-  </script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;overflow:hidden;font-family:Arial,sans-serif}
+#panel{
+ position:fixed;z-index:20;left:50%;bottom:12px;transform:translateX(-50%);
+ width:min(95vw,520px);padding:12px;border-radius:18px;
+ background:rgba(0,0,0,.82);color:#fff;text-align:center;
+ backdrop-filter:blur(8px)
+}
+#status{font-size:14px;color:#8eeaff;margin-bottom:8px}
+.buttons{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+button{
+ border:0;border-radius:11px;padding:10px 12px;
+ color:#fff;background:#1976d2;font-weight:bold;font-size:14px
+}
+button:active{transform:scale(.95)}
+.stop{background:#e53935}
+.run{background:#2e7d32}
+.space{background:#7b1fa2}
+</style>
 </head>
 
 <body>
-  <div id="top-panel">
-    เล็งกล้องไปที่ Hiro Marker
-    <span class="hint">อนุญาตให้เว็บไซต์ใช้กล้องเมื่อเบราว์เซอร์ถาม</span>
+<div id="panel">
+  <div id="status">กำลังเปิดกล้อง... ส่องไปที่ Hiro Marker</div>
+  <div class="buttons">
+    <button class="run" onclick="toggleRun('buffalo')">🐃 ควาย วิ่ง</button>
+    <button class="run" onclick="toggleRun('elephant')">🐘 ช้าง วิ่ง</button>
+    <button class="run" onclick="toggleRun('horse')">🐎 ม้า วิ่ง</button>
+    <button class="space" onclick="toggleRun('spaceship')">🚀 ยานบิน</button>
+    <button class="stop" onclick="stopAll()">หยุดทั้งหมด</button>
   </div>
+</div>
 
-  <div id="controls">
-    <button id="run-button" type="button">หยุดมอเตอร์</button>
-    <button id="status-button" type="button">จำลองคำเตือน</button>
-  </div>
+<a-scene
+ embedded
+ vr-mode-ui="enabled:false"
+ renderer="antialias:true; alpha:true"
+ arjs="sourceType:webcam; trackingMethod:best; debugUIEnabled:false">
 
-  <a-scene
-    embedded
-    vr-mode-ui="enabled: false"
-    renderer="logarithmicDepthBuffer: true; antialias: true; colorManagement: true"
-    arjs="sourceType: webcam; trackingMethod: best; debugUIEnabled: false"
-  >
-    <a-marker
-      id="hiro-marker"
-      preset="hiro"
-      emitevents="true"
-      smooth="true"
-      smooth-count="8"
-      smooth-tolerance="0.01"
-      smooth-threshold="3"
-    >
-      <!-- Floor plate -->
-      <a-box
-        position="0 0.04 0"
-        width="1.35"
-        height="0.08"
-        depth="0.85"
-        color="#455a64"
-        roughness="0.8"
-      ></a-box>
+<a-marker id="hiro" preset="hiro">
 
-      <!-- Two mounting feet -->
-      <a-box position="-0.42 0.15 0" width="0.18" height="0.18" depth="0.55" color="#263238"></a-box>
-      <a-box position="0.42 0.15 0" width="0.18" height="0.18" depth="0.55" color="#263238"></a-box>
+<!-- พื้น -->
+<a-plane position="0 0 0" rotation="-90 0 0"
+ width="4" height="4" color="#4caf50" opacity=".25"
+ material="transparent:true"></a-plane>
 
-      <!-- Motor housing: cylinder lies along X axis -->
-      <a-cylinder
-        id="motor-body"
-        position="0 0.47 0"
-        rotation="0 0 90"
-        radius="0.32"
-        height="0.72"
-        segments-radial="32"
-        color="#1976d2"
-        metalness="0.25"
-        roughness="0.55"
-      ></a-cylinder>
+<!-- ================= ควาย ================= -->
+<a-entity id="buffalo" position="-1 0.15 0">
+  <a-box position="0 .65 0" width="1.05" height=".7" depth=".55" color="#3e2723"></a-box>
+  <a-box position="-.58 .72 0" width=".35" height=".45" depth=".42" color="#4e342e"></a-box>
+  <a-box position="-.78 .87 0" width=".16" height=".13" depth=".13" color="#fff"></a-box>
+  <a-box position="-.78 .87 .18" width=".16" height=".13" depth=".13" color="#fff"></a-box>
+  <!-- เขา -->
+  <a-cone position="-.75 1.03 -.22" radius-bottom=".13" height=".35" color="#f5f5f5"></a-cone>
+  <a-cone position="-.75 1.03 .22" radius-bottom=".13" height=".35" color="#f5f5f5"></a-cone>
+  <!-- ขา -->
+  <a-box position="-.32 .2 -.2" width=".14" height=".45" depth=".14" color="#2d1b18"></a-box>
+  <a-box position="-.32 .2 .2" width=".14" height=".45" depth=".14" color="#2d1b18"></a-box>
+  <a-box position=".35 .2 -.2" width=".14" height=".45" depth=".14" color="#2d1b18"></a-box>
+  <a-box position=".35 .2 .2" width=".14" height=".45" depth=".14" color="#2d1b18"></a-box>
+  <!-- หาง -->
+  <a-cylinder position=".62 .75 0" rotation="0 0 55" radius=".025" height=".35" color="#2d1b18"></a-cylinder>
+  <a-text value="ควาย" position="0 1.25 0" align="center" color="#ffffff" scale=".7 .7 .7"></a-text>
+</a-entity>
 
-      <!-- Rear cap -->
-      <a-cylinder
-        position="-0.40 0.47 0"
-        rotation="0 0 90"
-        radius="0.27"
-        height="0.12"
-        color="#90a4ae"
-      ></a-cylinder>
+<!-- ================= ช้าง ================= -->
+<a-entity id="elephant" position="0 0.15 0">
+  <a-box position="0 .72 0" width="1.15" height=".85" depth=".72" color="#78909c"></a-box>
+  <a-sphere position="-.65 .88 0" radius=".42" color="#90a4ae"></a-sphere>
+  <!-- งวง -->
+  <a-cylinder position="-.98 .62 0" radius=".11" height=".65"
+              rotation="0 0 90" color="#90a4ae"></a-cylinder>
+  <!-- หู -->
+  <a-sphere position="-.65 .9 -.38" radius=".32" scale=".55 1 .25" color="#607d8b"></a-sphere>
+  <a-sphere position="-.65 .9 .38" radius=".32" scale=".55 1 .25" color="#607d8b"></a-sphere>
+  <!-- งา -->
+  <a-cone position="-1.12 .67 -.13" radius-bottom=".06" height=".3" rotation="0 0 90" color="#fff8e1"></a-cone>
+  <a-cone position="-1.12 .67 .13" radius-bottom=".06" height=".3" rotation="0 0 90" color="#fff8e1"></a-cone>
+  <!-- ขา -->
+  <a-cylinder position="-.35 .25 -.25" radius=".13" height=".5" color="#607d8b"></a-cylinder>
+  <a-cylinder position="-.35 .25 .25" radius=".13" height=".5" color="#607d8b"></a-cylinder>
+  <a-cylinder position=".38 .25 -.25" radius=".13" height=".5" color="#607d8b"></a-cylinder>
+  <a-cylinder position=".38 .25 .25" radius=".13" height=".5" color="#607d8b"></a-cylinder>
+  <a-text value="ช้าง" position="0 1.35 0" align="center" color="#ffffff" scale=".7 .7 .7"></a-text>
+</a-entity>
 
-      <!-- Shaft assembly: parent fixes the shaft direction; child spins locally -->
-      <a-entity position="0.52 0.47 0" rotation="0 0 90">
-        <a-cylinder
-          id="shaft"
-          radius="0.09"
-          height="0.42"
-          color="#cfd8dc"
-          metalness="0.8"
-          roughness="0.2"
-          spin-control="axis: y; speed: 220; active: true"
-        >
-          <a-box position="0 0.12 0.09" width="0.05" height="0.18" depth="0.06" color="#ffeb3b"></a-box>
-        </a-cylinder>
-      </a-entity>
+<!-- ================= ม้า ================= -->
+<a-entity id="horse" position="1 0.15 0">
+  <a-box position="0 .75 0" width="1.0" height=".65" depth=".42" color="#8d6e63"></a-box>
+  <a-box position="-.58 1.02 0" width=".35" height=".55" depth=".35" color="#795548"></a-box>
+  <a-box position="-.72 1.23 0" width=".35" height=".25" depth=".3" color="#6d4c41"></a-box>
+  <!-- หู -->
+  <a-cone position="-.78 1.43 -.12" radius-bottom=".07" height=".22" color="#5d4037"></a-cone>
+  <a-cone position="-.78 1.43 .12" radius-bottom=".07" height=".22" color="#5d4037"></a-cone>
+  <!-- แผงคอ -->
+  <a-box position="-.48 1.25 0" width=".08" height=".65" depth=".12" color="#3e2723"></a-box>
+  <!-- ขา -->
+  <a-cylinder position="-.32 .25 -.15" radius=".07" height=".65" color="#6d4c41"></a-cylinder>
+  <a-cylinder position="-.32 .25 .15" radius=".07" height=".65" color="#6d4c41"></a-cylinder>
+  <a-cylinder position=".35 .25 -.15" radius=".07" height=".65" color="#6d4c41"></a-cylinder>
+  <a-cylinder position=".35 .25 .15" radius=".07" height=".65" color="#6d4c41"></a-cylinder>
+  <!-- หาง -->
+  <a-cylinder position=".57 .85 0" rotation="0 0 -35" radius=".035" height=".55" color="#3e2723"></a-cylinder>
+  <a-text value="ม้า" position="0 1.55 0" align="center" color="#ffffff" scale=".7 .7 .7"></a-text>
+</a-entity>
 
-      <!-- Status lamp -->
-      <a-sphere
-        id="warning-lamp"
-        position="0 0.87 0"
-        radius="0.075"
-        color="#00e676"
-        material="emissive: #00c853; emissiveIntensity: 0.8"
-      ></a-sphere>
+<!-- ================= ยานอวกาศ ================= -->
+<a-entity id="spaceship" position="0 2 -1.1">
+  <a-sphere radius=".45" scale="1 .35 1" color="#b0bec5" metalness=".7"></a-sphere>
+  <a-cone position="0 -.25 0" radius-bottom=".27" radius-top=".08" height=".55"
+          color="#ff9800"></a-cone>
+  <a-sphere position="0 .05 -.38" radius=".12" color="#29b6f6"
+            material="emissive:#29b6f6; emissiveIntensity:1"></a-sphere>
+  <a-box position="-.5 0 0" width=".55" height=".08" depth=".25" color="#607d8b"></a-box>
+  <a-box position=".5 0 0" width=".55" height=".08" depth=".25" color="#607d8b"></a-box>
+  <a-text value="ยานอวกาศ" position="0 .65 0" align="center" color="#ffffff" scale=".55 .55 .55"></a-text>
+</a-entity>
 
-      <!-- AR information label -->
-      <a-text
-        id="ar-label"
-        value="MOTOR M1\nSTATUS: NORMAL"
-        position="0 1.12 0"
-        rotation="-90 0 0"
-        align="center"
-        width="2.4"
-        color="#ffffff"
-        side="double"
-      ></a-text>
-    </a-marker>
+</a-marker>
+<a-entity camera></a-entity>
+</a-scene>
 
-    <a-entity camera></a-entity>
-  </a-scene>
+<script>
+const moving = {
+  buffalo:false,
+  elephant:false,
+  horse:false,
+  spaceship:false
+};
+
+const entities = {
+  buffalo: document.getElementById('buffalo'),
+  elephant: document.getElementById('elephant'),
+  horse: document.getElementById('horse'),
+  spaceship: document.getElementById('spaceship')
+};
+
+const status = document.getElementById('status');
+const marker = document.getElementById('hiro');
+
+marker.addEventListener('markerFound', () => {
+  status.textContent = 'พบ Hiro Marker ✓ ควาย ช้าง ม้า และยานอวกาศ';
+});
+
+marker.addEventListener('markerLost', () => {
+  status.textContent = 'ไม่พบ Marker — ส่องกล้องไปที่ Hiro Marker';
+});
+
+function toggleRun(name){
+  moving[name] = !moving[name];
+  status.textContent =
+    moving[name] ? getName(name) + ' กำลังวิ่ง/เคลื่อนที่ 🏃' : getName(name) + ' หยุดแล้ว';
+}
+
+function getName(name){
+  return {buffalo:'ควาย', elephant:'ช้าง', horse:'ม้า', spaceship:'ยานอวกาศ'}[name];
+}
+
+function stopAll(){
+  Object.keys(moving).forEach(k => moving[k] = false);
+  status.textContent = 'หยุดการเคลื่อนที่ทั้งหมด';
+}
+
+let t = 0;
+let last = performance.now();
+
+function loop(now){
+  const dt = (now-last)/1000;
+  last = now;
+  t += dt;
+
+  // สัตว์วิ่งไป-กลับบนพื้นที่ AR
+  ['buffalo','elephant','horse'].forEach((name, i) => {
+    if(moving[name]){
+      const e = entities[name];
+      const baseZ = 0;
+      const x = (i-1) + Math.sin(t*2.2) * 0.65;
+      const y = 0.15 + Math.abs(Math.sin(t*7))*0.05;
+      e.setAttribute('position', `${x} ${y} ${baseZ}`);
+      e.object3D.rotation.y = Math.sin(t*2.2) > 0 ? 0 : Math.PI;
+    }
+  });
+
+  // ยานบินขึ้น-ลงและวนรอบ
+  if(moving.spaceship){
+    const x = Math.sin(t*1.8)*1.25;
+    const z = -1.1 + Math.cos(t*1.8)*0.7;
+    const y = 1.8 + Math.sin(t*3.5)*0.25;
+    entities.spaceship.setAttribute('position', `${x} ${y} ${z}`);
+    entities.spaceship.object3D.rotation.y += dt*2;
+  }
+
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);
+</script>
 </body>
 </html>
